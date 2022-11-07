@@ -1,11 +1,15 @@
 const mysql = require('mysql2');
 // const express = require('express');
-const inquirer = require('inquirer');
-const cTable = require('console.table');
+require("console.table");
+const consoleTable  = require('console.table');
 
 // Express middleware
 // const PORT = process.env.PORT || 3001;
 // const app = express();
+let roleList = [];
+let employeeList = [];
+let managerList = [];
+let departmentList = [];
 
 // Connect to database
 const connection = mysql.createConnection(
@@ -139,7 +143,7 @@ function viewDepartments() {
 function viewRoles() {
   console.log(`Viewing all roles`);
   connection.query("select * from roles", (err, res) => {
-      if (err) throw err;
+      if (err) throw err
       console.table(res);
       promptUser();
   });
@@ -171,3 +175,100 @@ function addDepartment() {
       });
   });
 }
+
+
+//display department list to add role to or department to delete
+function getDepartments() {
+  return new Promise ((resolve, rejects) => {
+      connection.query("SELECT department_name FROM department;", (err, res) => {
+          if (err) {
+              throw err;
+          }
+          for (let i = 0; i < res.length; i++) {
+              departmentList.push(res[i].department_name);
+          }
+          resolve(departmentList);
+      });
+  });
+}
+//add role
+async function addRole() {
+  await getDepartments();
+  inquirer.prompt([
+      {
+          name: "title",
+          type: "input",
+          message: "What is the name of the new role?"
+      },
+      {
+          name: "salary",
+          type: "input",
+          message: "What is the salary for the new role? (DON'T inc commas)"
+      },
+      {
+          name: "department",
+          type: "list",
+          message: "Select department for new role?",
+          choices: departmentList
+      }
+  ]).then(({ title, salary, department }) => {
+      connection.query("INSERT INTO roles (title, salary, department_id) VALUES (?, ?, (SELECT id FROM department WHERE department_id = ?));", [title, salary, department], (err, res) => {
+          if (err) {
+              throw err;
+          }
+          console.log(`\nNew role successfully added -- ${title} - ${salary} - ${department}\n`);
+          promptUser();
+      });    
+  })
+}
+
+
+// Delete Department
+async function deleteDepartment() {
+  await getDepartments();
+  inquirer.prompt([
+      {
+          name: "department",
+          type: "list",
+          message: "What department would you like to delete?",
+          choices: departmentList
+      }
+  ]).then(function (res) {
+              connection.query("DELETE FROM department WHERE department_name = ?", [res.department], (err, data) => { 
+                if (err) throw err;
+          console.table(`Successfully deleted department`);
+          promptUser();
+ })})};
+
+ // Get the current list of roles from the database to pass into the addEmployee prompt
+function getRoles() {
+  return new Promise((resolve, rejects) => {
+      connection.query("SELECT title FROM roles;", (err, res) => {
+          if (err) {
+              throw err;
+          }
+          for (let i = 0; i < res.length; i++) {
+              roleList.push(res[i].title);
+          }
+          resolve(roleList);
+      });
+  });
+}
+
+async function deleteRole() {
+  await getRoles();
+  inquirer.prompt([
+      {
+          name: "deleteRole",
+          type: "list",
+          message: "What role would you like to delete?",
+          choices: roleList
+      }
+  ]).then(function (res) {
+              connection.query("DELETE FROM roles WHERE title = ?", [res.deleteRole], (err, data) => { 
+                if (err) throw err;
+          console.table(`Successfully deleted Role`);
+          promptUser();
+ })})};
+
+

@@ -1,4 +1,5 @@
 const mysql = require('mysql2');
+const inquirer = require('inquirer');
 // const express = require('express');
 require("console.table");
 const consoleTable  = require('console.table');
@@ -212,7 +213,7 @@ async function addRole() {
           choices: departmentList
       }
   ]).then(({ title, salary, department }) => {
-      connection.query("INSERT INTO roles (title, salary, department_id) VALUES (?, ?, (SELECT id FROM department WHERE department_id = ?));", [title, salary, department], (err, res) => {
+      connection.query("INSERT INTO roles (title, salary, department_id) VALUES (?, ?, (SELECT id FROM department WHERE department_name = ?));", [title, salary, department], (err, res) => {
           if (err) {
               throw err;
           }
@@ -270,5 +271,20 @@ async function deleteRole() {
           console.table(`Successfully deleted Role`);
           promptUser();
  })})};
+
+
+  async function viewEmployeesByManager(){
+    console.log('viewEmployeesByManage');
+    try {
+        const result = await connection.query("SELECT employee.id AS 'Employee ID', employee.firstName AS 'Employee First Name', employee.lastName AS 'Employee Surname', manager_id AS 'Manager ID', manager.firstName AS 'Manager First Name', manager.lastName AS 'Managers Surname' FROM employee, employee manager WHERE employee.managerId = manager.id");
+       
+        let allEmployees = Object.values(result[0]);
+
+        console.log('\nEmployees by Manager Table\n');
+        console.table(allEmployees);
+    } catch (error) {
+        console.log('Error in viewEmployeesByManager, error is ', error);
+    }
+}
 
 

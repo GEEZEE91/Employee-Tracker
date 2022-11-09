@@ -19,18 +19,27 @@ VALUES
     ('Graduate Engineer', 70000.00, 2),
     ('HR Manager', 80000.00, 3),
     ('Accounts Assistant', 65000.00, 4),
-    ('Accountant', 125000.00, 4);
+    ('Accountant', 125000.00, 4),
+    ('Payroll Officer', 60000.00, 3);
+
+
+
+--MANAGERS
 
 
 -- employees --
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
-VALUES ('Frank', 'Mitchell', 1, NULL), -- Sales Manager --
+VALUES 
+  ('Frank', 'Mitchell', 1, NULL), -- Sales Manager --
     ('Tim', 'Anderson', 3, NULL), -- Lead Engineer Manager --
     ('Fiona', 'Smith', 8, NULL), -- Accountant--
+    ('David', 'Ford', 6, NULL), -- HR
+    ('Sam', 'Cross', 2, 1), 
     ('Jim', 'James', 2, 1),
     ('Marco', 'Jones', 4, 2),
-    ('Kevin', 'Patterson', 5, 2),
-    ('Jemma', 'Kerr', 7 , 3) ;
+    ('Paul', 'Jamerson', 5, 2), 
+    ('David', 'Ford', 6, 4),
+    ('Jemma', 'Kerr', 7 , 3);
 
 -- Selects all columns from each table in database --
 SELECT * FROM employee;

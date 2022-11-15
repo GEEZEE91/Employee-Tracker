@@ -132,38 +132,45 @@ function promptUser() {
   });
 }
 
+//view dept's
+viewDepartments = () => {
+  console.log('Viewing all Departments...\n');
+  var query =
+  `SELECT department.id AS id, department.department_name AS department FROM department`;
+  connection.query(query, function (err, res) {
+    if (err) throw err;
+    console.log('----------------------------------------------------------------');
+    console.log('All Departments\n');
+    console.log('----------------------------------------------------------------');
+    console.table(res);
+    console.log("Departments Viewed!\n");
 
-//Select from department
-function viewDepartments() {
-  console.log(`Viewing all Departments`);
-  connection.query("select * from department", (err, res) => {
-      if (err) throw err;
-      console.table(res);
-      promptUser();
-  });
-}
+    promptUser();
+  })};
 
-//Select from roles
+//view from roles
 function viewRoles() {
-  console.log(`Viewing all roles`);
-  connection.query("select * from roles", (err, res) => {
-      if (err) throw err;
+  console.log(`Viewing all Roles`);
+  var query =
+  `SELECT roles.id, roles.title, roles.salary, department.department_name AS department
+               FROM roles
+               INNER JOIN department ON roles.department_id = department.id`;
+ connection.query(query, function (err, res) {
+  if (err) throw err;
+  console.log('----------------------------------------------------------------');
+  console.log('All Roles\n');
+  console.log('----------------------------------------------------------------');
+
       console.table(res);
+      console.log("Roles Viewed!\n");  
       promptUser();
   });
 }
-//Select from employee
-// function viewEmployees() {
-//   console.log(`Viewing all Employees`);
-//   connection.query("select * from employee", (err, res) => {
-//       if (err) throw err;
-//       console.table(res);
-//       promptUser();
-//   });
-// }
+
+
 
 //View Employees/ READ all, SELECT * FROM
-function viewEmployees() {
+ viewEmployees = () =>{
     console.log("Viewing employees\n");
   
     var query =
@@ -178,47 +185,55 @@ function viewEmployees() {
   
     connection.query(query, function (err, res) {
       if (err) throw err;
-  
+      console.log('----------------------------------------------------------------');
+      console.log('All Employees\n');
+      console.log('----------------------------------------------------------------');
       console.table(res);
       console.log("Employees viewed!\n");
   
-      firstPrompt();
+      promptUser();
     });
-  
-  }
+ 
+  };
 // INSERT INTO department
-function addDepartment() {
+ addDepartment = () =>{
     inquirer.prompt([
         {
-            type: "input",
             name: "deptName",
-            message: "What Department would you like to add?"
+            type: "input",
+            message: "What Department would you like to add?",
+            validate: deptName => {
+              if (deptName) {
+                  return true;
+              } else {
+                  console.log('Please enter a department');
+                  return false;
+              }
+            }
         }
-    ]).then(function (res) {
-        // console.log(res);
-        connection.query("INSERT INTO department SET ?", { department_name: res.deptName }, (err, res) => {
+    ]).then(res =>{
+        connection.query(`INSERT INTO department (department_name)VALUES (?)`, res.deptName, (err, results) => {
             if (err) throw err;
-            console.table(`Successfully added ${deptName}`);
+            console.log('----------------------------------------------------------------');
+            console.log ("Successfully added -- " + res.deptName + " -- to Departments");
+            console.log('----------------------------------------------------------------');
             promptUser();
         });
     });
-  }
+  };
 
 //INSERT into roles
 //display department list to add role to or department to delete
 function getDepartments() {
     return new Promise ((resolve, rejects) => {
-        connection.query("SELECT department_name FROM department;", (err, res) => {
-            if (err) {
-                throw err;
-            }
-            for (let i = 0; i < res.length; i++) {
-            departmentList.push(res[i].department_name);
-            }
-            resolve(departmentList);
+        connection.query(`SELECT department_name, id FROM department`, (err, res) => {
+            if (err) throw err;
+             departmentList =  res.map(({ department_name, id }) => ({ name: department_name, value: id }));
+          resolve(departmentList);
         });
     });
   }
+
   //add role
   async function addRole() {
     await getDepartments();
@@ -239,15 +254,17 @@ function getDepartments() {
             message: "Select department for new role?",
             choices: departmentList
         }
-    ]).then(({ title, salary, department }) => {
-        connection.query("INSERT INTO roles (title, salary, department_id) VALUES (?, ?, (SELECT id FROM department WHERE department_name = ?));", [title, salary, department], (err, res) => {
+    ]).then(({ title, salary, department}) => {
+        connection.query(`INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)`, [title, salary, department], (err, res) => {
             if (err) {
                 throw err;
             }
-            console.log(`\nNew role successfully added -- ${title} - ${salary} - ${department}\n`);
+            console.log('----------------------------------------------------------------');
+            console.log(`\nSuccessfully added New Role -- ${title} - ${salary} --`);
+            console.log('----------------------------------------------------------------');
             promptUser();
         });    
-    })
+    });
   }
 
 // Add Employee
@@ -277,7 +294,9 @@ function addEmployee() {
   ]).then(function (res) {
       connection.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)', [res.firstName, res.lastName, res.rolesId, res.managerId], (err, data) => {
           if (err) throw err;
+          console.log('----------------------------------------------------------------');
           console.table("Successfully Added employee");
+          console.log('----------------------------------------------------------------');
           promptUser();
       });
   });
@@ -319,7 +338,9 @@ function updateEmployeeManager() {
   ]).then(function (res) {
       connection.query("UPDATE employee SET manager_id = ? WHERE id = ?", [res.manager_id, res.employee_Id], (err, data) => {
           if (err) throw err;
+          console.log('----------------------------------------------------------------');
           console.table(`Successfully updated Employee's Manager`);
+          console.log('----------------------------------------------------------------');
           promptUser();
       });
   });
@@ -352,9 +373,11 @@ async function deleteDepartment() {
             choices: departmentList
         }
     ]).then(function (res) {
-                connection.query("DELETE FROM department WHERE department_name = ?", [res.department], (err, data) => { 
-                  if (err) throw err;
-            console.table(`Successfully deleted department`);
+      connection.query(`DELETE FROM department WHERE id = ? `, res.department, (err, result) => {
+        if (err) throw err;
+        console.log('----------------------------------------------------------------');
+            console.table(`Successfully deleted Department`);
+            console.log('----------------------------------------------------------------');
             promptUser();
    })})};
 
@@ -384,7 +407,9 @@ function getRoles() {
     ]).then(function (res) {
                 connection.query("DELETE FROM roles WHERE title = ?", [res.deleteRole], (err, data) => { 
                   if (err) throw err;
+                  console.log('----------------------------------------------------------------');
             console.table(`Successfully deleted Role`);
+            console.log('----------------------------------------------------------------');
             promptUser();
    })})};
   
@@ -416,7 +441,7 @@ function viewEmployeeByDepartment() {
       if (err) throw err;
   
       const departmentChoices = res.map(data => ({
-        value: data.id, name: data.name
+        value: data.id, department_name: data.department_name
       }));
   
       console.table(res);
@@ -442,7 +467,7 @@ function viewEmployeeByDepartment() {
         console.log("answer ", answer.departmentId);
   
         var query =
-          `SELECT e.id, e.first_name, e.last_name, r.title, d.department_name AS department 
+          `SELECT e.id, e.first_name, e.last_name, r.title, r.salary, d.department_name AS department 
     FROM employee e
     JOIN roles r
       ON e.role_id = r.id
@@ -454,7 +479,7 @@ function viewEmployeeByDepartment() {
           if (err) throw err;
   
           console.table("response ", res);
-          console.log(res.affectedRows + "Employees are viewed!\n");
+          console.log(res.affectedRows + " Employees are viewed!\n");
   
           promptUser();
         });
@@ -517,8 +542,9 @@ function viewEmployeeByDepartment() {
           },
           function (err, res) {
             if (err) throw err;
-  
+            console.log('----------------------------------------------------------------');
             console.table(res);
+            console.log('----------------------------------------------------------------');
             console.log(res.insertedRows + "Inserted successfully!\n");
   
             promptUser();
@@ -527,13 +553,12 @@ function viewEmployeeByDepartment() {
   }
 //View utilized budget by department
 function viewTotalBudgetByDepartment() {
-  console.log(`Viewing Budget by departments`);
+  console.log(`Viewing Budget by Departments`);
   connection.query("SELECT department.id, department.department_name, SUM(roles.salary) AS Utilized_Budget FROM employee JOIN roles on employee.role_id = roles.id JOIN department on roles.department_id = department.id GROUP BY department.id", (err, res) => {
       if (err) throw err;
+      console.log('----------------------------------------------------------------');
       console.table(res);
+      console.log('----------------------------------------------------------------');
       promptUser();
   });
 }
-
-
- promptUser();15

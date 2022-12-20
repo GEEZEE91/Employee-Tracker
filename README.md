@@ -10,6 +10,10 @@ Command-line application that acts as a employee managment system enabliong the 
 
 The application has employeee database consists of 3 tables, departments, roles and employess on which a number of sql query's are performed based on the users responce to the command line inquirer prompts.
 
+![image](https://user-images.githubusercontent.com/3950562/208742025-618c2553-3c0f-4e7f-bf7e-33b4e39ac235.png)
+
+![image](https://user-images.githubusercontent.com/3950562/208741942-a03f8e1a-b4e0-4e1a-b701-b0cf4f6599c1.png)
+
 ## Usage
 The application has the below functionality that can be accessed by runing npm start
 
@@ -27,7 +31,10 @@ The application has the below functionality that can be accessed by runing npm s
  
  - Delete departments, roles, and employees.
 
-View the total utilized budget of a department—in other words, the combined salaries of all employees in that department.
+ - View the total utilized budget of a department—in other words, the combined salaries of all employees in that department.
+
+![image](https://user-images.githubusercontent.com/3950562/208742143-a88516fd-4934-4f1a-8b70-e0165eaef8d0.png)
+
 ## Installation
 The user should clone the repository from GitHub. 
 

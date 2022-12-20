@@ -35,6 +35,11 @@ The application has the below functionality that can be accessed by runing npm s
 
 ![image](https://user-images.githubusercontent.com/3950562/208742143-a88516fd-4934-4f1a-8b70-e0165eaef8d0.png)
 
+## Video Link 
+
+The below link is a walkthrough guide on the applications functionality
+https://drive.google.com/file/d/1w22h6YEMt8WDB2Y5wj1hPnS5XgvWtKD_/view
+
 ## Installation
 The user should clone the repository from GitHub. 
 
